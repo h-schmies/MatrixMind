@@ -5,13 +5,19 @@ from layers import Linear
 from activation_funcs import relu
 from loss import mse
 
-from typing import SupportsInt, SupportsFloat
+from typing import SupportsInt, SupportsFloat, Callable
 
 
 class SimpleNN:
     """Simple neural network with one hidden layer"""
 
-    def __init__(self, input_size: int, hidden_size: int, output_size: int):
+    def __init__(
+        self,
+        input_size: int,
+        hidden_size: int,
+        output_size: int,
+        activation_function: Callable = relu,
+    ):
         """
         Construct a new SimpleNN object
 
@@ -23,6 +29,8 @@ class SimpleNN:
         self.l1 = Linear(input_size, hidden_size)
         self.l2 = Linear(hidden_size, output_size)
 
+        self.activation_function = activation_function
+
     def __call__(self, x: Tensor) -> Tensor:
         """
         Performs forward propagation on network
@@ -31,7 +39,7 @@ class SimpleNN:
             x (Tensor): The input data to perform forward propagation with
         """
         x = self.l1(x)
-        x = relu(x)
+        x = self.activation_function(x)
         x = self.l2(x)
         return x
 
@@ -66,26 +74,3 @@ class SimpleNN:
                 param.data -= learning_rate * param.grad
                 param.grad = np.zeros_like(param.data)
             print(f"Epoch {epoch}, Loss: {loss}")
-
-
-if __name__ == "__main__":
-    # Create some dummy data for training
-    x_train = [[0, 0], [0, 1], [1, 0], [1, 1]]
-    y_train = [[0], [1], [1], [0]]
-    x_train = Tensor(
-        np.array(x_train, dtype=np.float64), requires_grad=True
-    )  # 10 samples, 3 features
-    y_train = Tensor(
-        np.array(y_train, dtype=np.float64), requires_grad=True
-    )  # 10 samples, 2 output values
-
-    # Initialize the model
-    model = SimpleNN(input_size=2, hidden_size=5, output_size=1)
-
-    # Train the model
-    model.train(x_train, y_train, epochs=10000)
-
-    print(model(Tensor(np.array([0, 0], dtype=np.float64))))
-    print(model(Tensor(np.array([1, 0], dtype=np.float64))))
-    print(model(Tensor(np.array([0, 1], dtype=np.float64))))
-    print(model(Tensor(np.array([1, 1], dtype=np.float64))))
