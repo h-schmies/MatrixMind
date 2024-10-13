@@ -2,17 +2,18 @@ import numpy as np
 
 from tensor import Tensor
 
-def mse(pred: Tensor, target: Tensor): 
+
+def mse(pred: Tensor, target: Tensor):
     """
     Mean squared error function with appropriate gradient calculation
 
-    Args: 
+    Args:
         pred (Tensor): The predictions from the model
         target (Tensor): The actual target values
     """
-    loss = Tensor([np.mean((pred.data - target.data)**2)], requires_grad=True)
+    loss = Tensor([np.mean((pred.data - target.data) ** 2)], requires_grad=True)
 
-    def _backward(): 
+    def _backward():
         pred.grad += (2 * (pred.data - target.data)) / target.data.size
 
     loss._backward = _backward
